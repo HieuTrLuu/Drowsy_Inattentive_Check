@@ -1,6 +1,5 @@
 # Drowsiness
 * Detects person's activity
-* https://youtu.be/7Tzy7Z1ZQxg
 
 ### Prerequisites
 * python 3
@@ -20,6 +19,3 @@
 
 ### Links
 * Who is interesting with computer vision I recommending this place: www.pyimagesearch.com
-
-### Author
-* MarsLviv - *matsars@gmail.com*
