@@ -31,9 +31,10 @@ def get_6_main_keypoints(key_points):
     # right eye right corner 46
     # Left Mouth corner 49
     # Right mouth corner 55
-	image_pints = np.array(key_points[[30,8,36,45,48,54]], dtype=np.float32)
+	# image_pints = np.array(key_points[[30,8,36,45,48,54]], dtype=np.float32)
+	image_pints = np.array(key_points[[30,8,36,45,48,54]], dtype="double")
 	return image_pints
-    
+
 def get_head_pose(image_pints, image):
 	# 3D model points.
 	size = image.shape
@@ -58,8 +59,8 @@ def get_head_pose(image_pints, image):
 							[0, 0, 1]], dtype = "double"
 							)
 
-	print("Camera Matrix :\n {0}".format(camera_matrix))
-	print(f"image_pints {(model_points, image_pints, camera_matrix, dist_coeffs)}")
+	# print("Camera Matrix :\n {0}".format(camera_matrix))
+	# print(f"image_pints {(model_points, image_pints, camera_matrix, dist_coeffs)}")
 	dist_coeffs = np.zeros((4,1)) # Assuming no lens distortion
 	(success, rotation_vector, translation_vector) = cv2.solvePnP(model_points, image_pints, camera_matrix, dist_coeffs)
 
@@ -75,19 +76,18 @@ def get_head_pose(image_pints, image):
 	(nose_end_point2D, jacobian) = cv2.projectPoints(np.array([(0.0, 0.0, 1000.0)]), rotation_vector, translation_vector, camera_matrix, dist_coeffs)
 
 	for p in image_pints:
-		cv2.circle(im, (int(p[0]), int(p[1])), 3, (0,0,255), -1)
+		cv2.circle(image, (int(p[0]), int(p[1])), 3, (0,0,255), -1)
 
 
 	p1 = ( int(image_pints[0][0]), int(image_pints[0][1]))
 	p2 = ( int(nose_end_point2D[0][0][0]), int(nose_end_point2D[0][0][1]))
 
-	cv2.line(im, p1, p2, (255,0,0), 2)
+	cv2.line(image, p1, p2, (255,0,0), 2)
 
 	# Display image
 	# cv2.imshow("Output", im)
 	# cv2.waitKey(0)
-	return im
-
+	return image
 
 def eye_aspect_ratio(eye):
 	# compute the euclidean distances between the two sets of
@@ -152,7 +152,7 @@ class VideoMain():
 
 	def init_stream(self, camera=0):
 		if type(camera) == type(1):
-			self.camera = camera;
+			self.camera = camera
 			self.web_cam = True
 			self.file = ''
 			try: 
@@ -216,12 +216,7 @@ class VideoMain():
 				# array
 				shape = self.predictor(gray, rect)
 				shape = face_utils.shape_to_np(shape)
-
-				image_pints = get_6_main_keypoints(shape)
-				
-
-				
-
+			
 				# extract the left and right eye coordinates, then use the
 				# coordinates to compute the eye aspect ratio for both eyes
 				leftEye = shape[self.lStart:self.lEnd]
@@ -238,10 +233,10 @@ class VideoMain():
 				rightEyeHull = cv2.convexHull(rightEye)
 				
 				try:
-					print(image_pints)
+					image_pints = get_6_main_keypoints(shape)
 					frame = get_head_pose(image_pints, frame)
 				except Exception as e:
-					pass
+					print(e)
 
 				cv2.drawContours(frame, [leftEyeHull], -1, (0, 255, 0), 1)
 				cv2.drawContours(frame, [rightEyeHull], -1, (0, 255, 0), 1)
@@ -297,56 +292,3 @@ class VideoMain():
 	def stop(self):
 		self.stop_process_loop()
 	
-
-
-
-def get_head_pose(frame, key_points):
-	# key_points = list(map(lambda x: (x[0], x[1]), key_points))
-	key_points = np.array(key_points)
-	size = frame.shape
-	# 3D model points.
-	model_points = np.array([
-								(0.0, 0.0, 0.0),             # Nose tip
-								(0.0, -330.0, -65.0),        # Chin
-								(-225.0, 170.0, -135.0),     # Left eye left corner
-								(225.0, 170.0, -135.0),      # Right eye right corne
-								(-150.0, -150.0, -125.0),    # Left Mouth corner
-								(150.0, -150.0, -125.0)      # Right mouth corner
-							
-							])
-
-
-	# Camera internals
-
-	focal_length = size[1]
-	center = (size[1]/2, size[0]/2)
-	camera_matrix = np.array(
-							[[focal_length, 0, center[0]],
-							[0, focal_length, center[1]],
-							[0, 0, 1]], dtype = "double"
-							)
-
-	# print("Camera Matrix :\n {0}".format(camera_matrix))
-
-	dist_coeffs = np.zeros((4,1)) # Assuming no lens distortion
-
-	(success, rotation_vector, translation_vector) = cv2.solvePnP(model_points, key_points, camera_matrix, dist_coeffs)
-
-	# print("Rotation Vector:\n {0}".format(rotation_vector))
-	# print("Translation Vector:\n {0}".format(translation_vector))
-
-
-	# Project a 3D point (0, 0, 1000.0) onto the image plane.
-	# We use this to draw a line sticking out of the nose
-
-
-	(nose_end_point2D, jacobian) = cv2.projectPoints(np.array([(0.0, 0.0, 1000.0)]), rotation_vector, translation_vector, camera_matrix, dist_coeffs)
-
-	for p in key_points:
-		cv2.circle(frame, (int(p[0]), int(p[1])), 3, (0,0,255), -1)
-
-
-	p1 = ( int(key_points[0][0]), int(key_points[0][1]))
-	p2 = ( int(nose_end_point2D[0][0][0]), int(nose_end_point2D[0][0][1]))
-	return p1,p2
-	# cv2.line(frame, p1, p2, (255,0,0), 2)
