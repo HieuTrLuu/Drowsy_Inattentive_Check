@@ -1,3 +1,13 @@
+import sys
+sys.path.insert(0,'../DDFA_V2')
+
+import yaml
+from FaceBoxes import FaceBoxes
+from TDDFA import TDDFA
+from utils.functions import draw_landmarks
+from utils.render import render
+from utils.depth import depth
+
 from imutils.video import FileVideoStream
 from imutils.video import VideoStream
 from videostream import VideoStream as VideoStream1
@@ -23,6 +33,27 @@ import numpy as np
 logging.config.dictConfig(logger_config)
 logger = logging.getLogger('app_logger')
 
+
+###########################################################
+# load config
+cfg = yaml.load(open('../DDFA_V2/configs/mb1_120x120.yml'), Loader=yaml.SafeLoader)
+
+# Init FaceBoxes and TDDFA, recommend using onnx flag
+onnx_flag = True  # or True to use ONNX to speed up
+if onnx_flag:
+    # !pip install onnxruntime
+    import os
+    os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
+    os.environ['OMP_NUM_THREADS'] = '4'
+    from FaceBoxes.FaceBoxes_ONNX import FaceBoxes_ONNX
+    from TDDFA_ONNX import TDDFA_ONNX
+    print(cfg)
+    face_boxes = FaceBoxes_ONNX()
+    tddfa = TDDFA_ONNX(**cfg)
+else:
+    face_boxes = FaceBoxes()
+    tddfa = TDDFA(gpu_mode=False, **cfg)
+###########################################################
 
 def get_6_main_keypoints(key_points):
     # nose 31
