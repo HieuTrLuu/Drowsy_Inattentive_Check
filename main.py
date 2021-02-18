@@ -98,21 +98,25 @@ class Container(BoxLayout):
 		self.sound_state = False
 
 	def on_slider_ear(self, value):
+		
 		self.stream.ear_threashold = float(str('{:.2f}').format(value))
 
 	def on_input_ear(self, value):
+		print(f'value {value}')
 		self.stream.ear_threashold = float(str('{:.2f}').format(value))
 
 	def on_slider_quality(self, value):
 		self.stream.reduce_image = value / 100
 
 	def on_input_quality(self, value):
+		print(f'value {value}')
 		self.stream.reduce_image = value / 100
 
 	def on_slider_delay(self, value):
 		self.stream.seconds_to_detect_drowsiness = value
 
 	def on_input_delay(self, value):
+		print(f'value {value}')
 		self.stream.seconds_to_detect_drowsiness = value
 
 	def on_show_video(self, value):
