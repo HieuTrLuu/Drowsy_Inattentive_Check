@@ -120,8 +120,10 @@ class Container(BoxLayout):
 		qsize = self.frames_queue.qsize()
 		self.alarm_state = False
 		for ii in range(qsize):
-			(alarm_state, self.fps, ear, self.image) = self.frames_queue.get()
+			(alarm_state, self.fps, ear, self.image, head_pose) = self.frames_queue.get()
 
+			self.link_to_label_head_pose.text = 'head pose: ' + f"{head_pose[0]:.4f}"
+			self.link_to_label_ear.text = 'ear: ' + f"{ear:.4f}"
 			self.alarm_state = self.alarm_state or alarm_state
 
 			# refresh graph
@@ -137,6 +139,7 @@ class Container(BoxLayout):
 
 		# refresh just last fps
 		self.link_to_label_fps.text = 'fps: ' + str(self.fps)
+
 		# refresh graph (bunch)
 		self.plot.points = self.points
 		# refrresh self.alarm_state (bunch)
@@ -196,8 +199,6 @@ class DrowsinessApp(App):
 									, show_video=self.config.data[0]['show_video']
 									, seconds_to_detect_drowsiness=self.config.data[0]['seconds_to_detect_drowsiness']
 									, frames_to_calculate_fps=self.config.data[0]['frames_to_calculate_fps'])
-			print(f"configgggg !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! {self.config.data[0]}" )
-			print("============================================================================")
 		except:
 			logger.info('could not init_tools for stream; raise exception')
 			raise ValueError('could not init_tools for stream')

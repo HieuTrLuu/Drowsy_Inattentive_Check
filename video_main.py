@@ -7,6 +7,7 @@ from TDDFA import TDDFA
 from utils.functions import draw_landmarks
 from utils.render import render
 from utils.depth import depth
+from utils.pose import viz_pose
 
 from imutils.video import FileVideoStream
 from imutils.video import VideoStream
@@ -45,10 +46,10 @@ if onnx_flag:
     import os
     os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
     os.environ['OMP_NUM_THREADS'] = '4'
-    from FaceBoxes.FaceBoxes_ONNX import FaceBoxes_ONNX
+    # from FaceBoxes.FaceBoxes_ONNX import FaceBoxes_ONNX
     from TDDFA_ONNX import TDDFA_ONNX
-    print(cfg)
-    face_boxes = FaceBoxes_ONNX()
+    # print(cfg)
+    # face_boxes = FaceBoxes_ONNX()
     tddfa = TDDFA_ONNX(**cfg)
 else:
     face_boxes = FaceBoxes()
@@ -65,6 +66,13 @@ def get_6_main_keypoints(key_points):
 	# image_pints = np.array(key_points[[30,8,36,45,48,54]], dtype=np.float32)
 	image_pints = np.array(key_points[[30,8,36,45,48,54]], dtype="double")
 	return image_pints
+
+def rect2list(rect):
+    x_min = rect.left()
+    x_max = rect.right()
+    y_min = rect.top()
+    y_max = rect.bottom()
+    return [x_min, y_min, x_max, y_max]
 
 def get_head_pose(image_pints, image):
 	# 3D model points.
@@ -216,6 +224,7 @@ class VideoMain():
 		ear = 0.5
 		tic = perf_counter()
 		alarm_state = False
+		head_pose = [0,0,0]
 		while  self.looping:
 			# if this is a file video stream, then we need to check if
 			# there any more frames left in the buffer to process
@@ -246,8 +255,12 @@ class VideoMain():
 				# convert the facial landmark (x, y)-coordinates to a NumPy
 				# array
 				shape = self.predictor(gray, rect)
-				shape = face_utils.shape_to_np(shape)
-			
+				shape = face_utils.shape_to_np(shape)			
+				param_lst, roi_box_lst = tddfa(frame, [rect2list(rect)])
+				ver_lst = tddfa.recon_vers(param_lst, roi_box_lst, dense_flag=False)
+
+				
+
 				# extract the left and right eye coordinates, then use the
 				# coordinates to compute the eye aspect ratio for both eyes
 				leftEye = shape[self.lStart:self.lEnd]
@@ -271,6 +284,8 @@ class VideoMain():
 
 				cv2.drawContours(frame, [leftEyeHull], -1, (0, 255, 0), 1)
 				cv2.drawContours(frame, [rightEyeHull], -1, (0, 255, 0), 1)
+				
+				frame, head_pose = viz_pose(frame, param_lst, ver_lst, show_flag=False, return_pose=True)
 
 				if ear < self.ear_threashold:
 					self.drowsiness_counter += 1
@@ -283,15 +298,16 @@ class VideoMain():
 			
 			if not self.frames_queue.full():
 				if self.show_video:
-					self.frames_queue.put((alarm_state, self.fps, ear, frame))
+					self.frames_queue.put((alarm_state, self.fps, ear, frame, head_pose))
 				else:
-					self.frames_queue.put((alarm_state, self.fps, ear, self.fake_frame))
+					self.frames_queue.put((alarm_state, self.fps, ear, self.fake_frame, head_pose))
 
 			if not (self.processed_frames % self.frames_to_calculate_fps):
 				toc = perf_counter()
 				self.fps = int(self.processed_frames // (toc - tic))
 				self.processed_frames = 0
 				tic = toc
+				# How to decide to throw drowsiness alert
 				self.ear_consecutive_frames = self.fps * self.seconds_to_detect_drowsiness
 
 		self.vs.stop();
