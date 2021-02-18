@@ -26,10 +26,12 @@
 	link_to_slider_delay: slider_delay
 	link_to_slider_quality: slider_quality
 	link_to_slider_eyes_tuner: slider_eyes_tuner
+	link_to_slider_angle_tuner: slider_angle_tuner
 
 	link_to_input_delay: input_delay
 	link_to_input_quality: input_quality
 	link_to_input_eyes_tuner: input_eyes_tuner
+	link_to_input_angle_tuner: input_angle_tuner
 
 	link_to_image: image
 	link_to_start_stop: start_stop
@@ -39,6 +41,8 @@
 	link_to_graph: graph
 	link_to_layout: layout
 
+	link_to_checkbox: checkbox
+
 	BoxLayout:		# menu
 		id: layout
 		orientation: 'vertical'
@@ -46,9 +50,12 @@
 		size: 300, 300
 		canvas:
 			Color:
-				rgb: 0, 0, 0
+				rgb: 255, 255, 255
 			Rectangle:
 				size: self.size
+
+		
+
 
 		BoxLayout:	# camera
 			size_hint: 0.1, 0.1
@@ -72,6 +79,46 @@
 				on_release:
 					root.on_start()
 
+
+		
+		BoxLayout:	# Warning
+			padding: 10
+			size_hint: 1, .2
+
+			Label:
+				font_size: '15sp'
+				text: 'drowsiness warning'
+				text_size: self.size
+				halign: 'left'
+				valign: 'center'
+			
+			Label:
+				font_size: '15sp'
+				text: 'attentiveness warning'
+				text_size: self.size
+				halign: 'left'
+				valign: 'center'
+
+
+		BoxLayout:	# select overlay
+			padding: 10
+			size_hint: 1, .2
+
+			Label:
+				font_size: '15sp'
+				text: 'Overlay selection'
+				text_size: self.size
+				halign: 'left'
+				valign: 'center'
+
+			CheckBox:
+				canvas.before:
+					Color:
+						rgb: 1,0,0
+				id: checkbox
+				on_active: root.on_checkbox_click(checkbox.active)
+				pos_hint: {"x":0.6, "y":0.4}
+				size_hint: 0.05,0.05
 
 		BoxLayout:	# delay
 			padding: 10
@@ -164,6 +211,37 @@
 
 			Label:
 	        	text: str(slider_eyes_tuner.value)
+	        BoxLayout:
+	        	padding: [10, 10, 10, 10]
+
+		BoxLayout:	# angle tunner
+			padding: 10
+			size_hint: 1, .2
+
+			Label:
+				font_size: '15sp'
+				text: 'Angle ratio'
+				text_size: self.size
+				halign: 'left'
+				valign: 'center'
+
+			Slider:
+				id: slider_angle_tuner
+				min: .1
+				max: .4
+				step: .01
+				value: .3
+				on_value: root.on_slider_ear(slider_angle_tuner.value)
+
+			TextInput: 
+				id: input_angle_tuner
+				hint_text:'Enter text'
+				pos_hint: {'center_x': 0.5, 'center_y': 0.705} 
+				size_hint: 0.95, 0.5
+				on_text: root.on_input_ear(input_angle_tuner.text)
+
+			Label:
+	        	text: str(slider_angle_tuner.value)
 	        BoxLayout:
 	        	padding: [10, 10, 10, 10]
 

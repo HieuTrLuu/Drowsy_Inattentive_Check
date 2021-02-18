@@ -151,6 +151,7 @@ class VideoMain():
 						, show_video=True
 						, seconds_to_detect_drowsiness=2
 						, frames_to_calculate_fps=4
+						, overlay_bool=True
 						):
 		self.frames_queue = frames_queue
 		self.ear_threashold = ear_threashold
@@ -158,7 +159,8 @@ class VideoMain():
 		self.show_video = show_video
 		self.seconds_to_detect_drowsiness = seconds_to_detect_drowsiness
 		self.frames_to_calculate_fps = frames_to_calculate_fps
-		self.fake_frame = array([1,1,1,3])
+		self.fake_frame = array([1,1,1,3]) #TODO:?
+		self.overlay_bool = overlay_bool
 
 		# initialize dlib's face detector (HOG-based) and then create
 		# the facial landmark predictor
@@ -179,9 +181,11 @@ class VideoMain():
 		self.drowsiness_counter = 0
 		self.fps = 0
 		self.looping = False # flag to show that start_process_loop() method running
-
+		
 		self.err_read_frame = False # error occured during frame reading
 		self.err_processing_frame = False# error occured during frame processing
+
+		
 
 	def start_stream(self):
 		self.vs.start()
@@ -273,19 +277,21 @@ class VideoMain():
 
 				# compute the convex hull for the left and right eye, then
 				# visualize each of the eyes
-				leftEyeHull = cv2.convexHull(leftEye)
-				rightEyeHull = cv2.convexHull(rightEye)
-				
-				try:
-					image_pints = get_6_main_keypoints(shape)
-					frame = get_head_pose(image_pints, frame)
-				except Exception as e:
-					print(e)
 
-				cv2.drawContours(frame, [leftEyeHull], -1, (0, 255, 0), 1)
-				cv2.drawContours(frame, [rightEyeHull], -1, (0, 255, 0), 1)
-				
-				frame, head_pose = viz_pose(frame, param_lst, ver_lst, show_flag=False, return_pose=True)
+				if(self.overlay_bool):
+					leftEyeHull = cv2.convexHull(leftEye)
+					rightEyeHull = cv2.convexHull(rightEye)
+					
+					try:
+						image_pints = get_6_main_keypoints(shape)
+						frame = get_head_pose(image_pints, frame)
+					except Exception as e:
+						print(e)
+
+					cv2.drawContours(frame, [leftEyeHull], -1, (0, 255, 0), 1)
+					cv2.drawContours(frame, [rightEyeHull], -1, (0, 255, 0), 1)
+					
+					frame, head_pose = viz_pose(frame, param_lst, ver_lst, show_flag=False, return_pose=True)
 
 				if ear < self.ear_threashold:
 					self.drowsiness_counter += 1
