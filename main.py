@@ -98,7 +98,6 @@ class Container(BoxLayout):
 		self.sound_state = False
 
 	def on_slider_ear(self, value):
-		
 		self.stream.ear_threashold = float(str('{:.2f}').format(value))
 
 	def on_input_ear(self, value):
@@ -128,6 +127,15 @@ class Container(BoxLayout):
 			self.stream.show_video = False
 
 			self.link_to_image.texture = self.main_image_texture
+
+	def on_checkbox_click(self, value):
+		self.stream.overlay_bool = value
+		if value is True: 
+			print("Checkbox Checked") 
+		else: 
+			print("Checkbox Unchecked") 
+
+        
 
 	def transfer_frame(self):
 		qsize = self.frames_queue.qsize()
