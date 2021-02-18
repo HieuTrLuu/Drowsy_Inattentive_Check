@@ -15,6 +15,7 @@
         size_hint_y: None
         height: 44
         on_release: root.select('item2')
+		
 
 <Container>:
 
@@ -28,6 +29,8 @@
 	link_to_image: image
 	link_to_start_stop: start_stop
 	link_to_label_fps: label_fps
+	link_to_label_ear: label_ear
+	link_to_label_head_pose :label_head_pose
 	link_to_graph: graph
 	link_to_layout: layout
 
@@ -57,6 +60,13 @@
 				text: 'Show video'
 				on_release: root.on_show_video(btn_show_video.text)
 
+			Button:
+				id: start_stop
+				font_size: '15sp'
+				text: 'Start'
+				on_release:
+					root.on_start()
+
 
 		BoxLayout:	# delay
 			padding: 10
@@ -64,7 +74,7 @@
 
 			Label:
 				font_size: '15sp'
-				text: 'Delay'
+				text: 'Time threshold for small EAR'
 				text_size: self.size
 				halign: 'left'
 				valign: 'center'
@@ -110,7 +120,7 @@
 
 			Label:
 				font_size: '15sp'
-				text: 'Eyes tuner'
+				text: 'EAR threshold'
 				text_size: self.size
 				halign: 'left'
 				valign: 'center'
@@ -133,17 +143,23 @@
 			spacing: 10
 			size_hint: 1, .2
 			
-			Button:
-				id: start_stop
-				font_size: '15sp'
-				text: 'Start'
-				on_release:
-					root.on_start()
+			
 
 			Label:
 				id: label_fps
 				font_size: '15sp'
 				text: 'fps: 0'
+
+			Label:
+				id: label_ear
+				font_size: '15sp'
+				text: 'ear: 0'
+
+			Label:
+				id: label_head_pose
+				font_size: '15sp'
+				text: 'head pose: 0'
+
 
 		BoxLayout:	# plot
 			padding: 5
