@@ -14,10 +14,10 @@ from kivy.animation import Animation
 from kivy.logger import Logger
 
 from kivy.config import Config
-Config.set('graphics', 'width', '1000')
-Config.set('graphics', 'height', '900')
+Config.set('graphics', 'width', '800')
+Config.set('graphics', 'height', '500')
 Config.set('graphics', 'minimum_width', '400')
-Config.set('graphics', 'minimum_height', '900')
+Config.set('graphics', 'minimum_height', '300')
 
 import cv2
 import json
@@ -128,14 +128,13 @@ class Container(BoxLayout):
 
 			self.link_to_image.texture = self.main_image_texture
 
-	def on_checkbox_click(self, value):
-		self.stream.overlay_bool = value
-		if value is True: 
-			print("Checkbox Checked") 
-		else: 
-			print("Checkbox Unchecked") 
+	def on_spinner_clicked(self, value): 
+		print("Language selected is " + value) 
+		# self.stream.select_algo = value
 
-        
+	def spinner_clicked(self, value): 
+		print("Language selected is " + value) 
+   
 
 	def transfer_frame(self):
 		qsize = self.frames_queue.qsize()
