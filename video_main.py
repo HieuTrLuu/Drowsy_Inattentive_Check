@@ -26,6 +26,9 @@ from threading import Thread
 from kivy.graphics.texture import Texture
 from kivy.core.image import Image
 
+
+from Tracker import CentroidTracker
+
 import logging.config
 from logger import logger_config
 
@@ -184,7 +187,7 @@ class VideoMain():
 		
 		self.err_read_frame = False # error occured during frame reading
 		self.err_processing_frame = False# error occured during frame processing
-
+		self.ct = CentroidTracker()
 		
 
 	def start_stream(self):
@@ -254,10 +257,22 @@ class VideoMain():
 			# detect faces in the grayscale frame
 			rects = self.detector(gray, 0)
 			# loop over the face detections
-			for rect in rects:
+
+			inputCentroids = np.zeros((len(rects), 2), dtype="int")
+			self.ct.update(rects)
+
+			for (i, rect) in enumerate(rects):
 				# determine the facial landmarks for the face region, then
 				# convert the facial landmark (x, y)-coordinates to a NumPy
+				
 				# array
+				x_min, y_min, x_max, y_max = rect2list(rect)
+				cX = int((x_min + x_max) / 2.0)
+				cY = int((y_min + y_max) / 2.0)
+				# TODO: probably change this to tracking nose only
+				inputCentroids[i] = (cX, cY)							
+				##############
+
 				shape = self.predictor(gray, rect)
 				shape = face_utils.shape_to_np(shape)			
 				param_lst, roi_box_lst = tddfa(frame, [rect2list(rect)])
@@ -302,6 +317,33 @@ class VideoMain():
 					self.drowsiness_counter = 0
 					alarm_state = False
 			
+			#
+			if len(self.ct.objects) == 0:
+				for i in range(0, len(inputCentroids)):
+					self.ct.register(inputCentroids[i])
+			else:
+				# grab the set of object IDs and corresponding centroids
+				objectIDs = list(self.ct.objects.keys())
+				objectCentroids = list(self.ct.objects.values())
+				# compute the distance between each pair of object
+				# centroids and input centroids, respectively -- our
+				# goal will be to match an input centroid to an existing
+				# object centroid
+				D = dist.cdist(np.array(objectCentroids), inputCentroids)
+				# in order to perform this matching we must (1) find the
+				# smallest value in each row and then (2) sort the row
+				# indexes based on their minimum values so that the row
+				# with the smallest value is at the *front* of the index
+				# list
+
+				# rows = D.min(axis=1).argsort()
+				# next, we perform a similar process on the columns by
+				# finding the smallest value in each column and then
+				# sorting using the previously computed row index list
+				# cols = D.argmin(axis=1)[rows]
+
+			
+
 			if not self.frames_queue.full():
 				if self.show_video:
 					self.frames_queue.put((alarm_state, self.fps, ear, frame, head_pose))
