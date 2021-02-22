@@ -100,23 +100,20 @@ class Container(BoxLayout):
 	def on_slider_ear(self, value):
 		self.stream.ear_threashold = float(str('{:.2f}').format(value))
 
-	def on_input_ear(self, value):
-		print(f'value {value}')
-		self.stream.ear_threashold = float(str('{:.2f}').format(value))
-
 	def on_slider_quality(self, value):
-		self.stream.reduce_image = value / 100
-
-	def on_input_quality(self, value):
-		print(f'value {value}')
 		self.stream.reduce_image = value / 100
 
 	def on_slider_delay(self, value):
 		self.stream.seconds_to_detect_drowsiness = value
 
-	def on_input_delay(self, value):
-		print(f'value {value}')
-		self.stream.seconds_to_detect_drowsiness = value
+	def on_input_attentiveness(self, value, angle, position):
+		print(f'value {value, angle, position}')
+		# print(f"{self.stream.attentive_dict}")
+		if position == 'bot':
+			self.stream.attentive_dict[angle][0]= value
+		elif position == 'top':
+			self.stream.attentive_dict[angle][1]= value
+
 
 	def on_show_video(self, value):
 		if value == 'Show video':
@@ -128,18 +125,15 @@ class Container(BoxLayout):
 
 			self.link_to_image.texture = self.main_image_texture
 	
-
-
 	def on_spinner_clicked(self, value): 
-		print("Language selected is " + value) 
+		print(f"Face detection algorithm is {value}" ) 
 		# self.stream.select_algo = value
 
 	def on_checkbox_click(self, value):
 		self.stream.overlay_bool = value
-		print(value)
-
-	def spinner_clicked(self, value): 
-		print("Language selected is " + value) 
+		
+	def on_checkbox_attention_click(self, value):
+		self.stream.check_attention = value
    
 
 	def transfer_frame(self):
@@ -148,8 +142,12 @@ class Container(BoxLayout):
 		for ii in range(qsize):
 			(alarm_state, self.fps, ear, self.image, head_pose) = self.frames_queue.get()
 
-			self.link_to_label_head_pose.text = 'head pose: ' + f"{head_pose[0]:.4f}"
-			self.link_to_label_ear.text = 'ear: ' + f"{ear:.4f}"
+			# self.link_to_label_head_pose.text = 'head pose: ' + f"{head_pose[0]:.4f}"
+			self.link_to_label_yaw.text =  f"yaw: {head_pose[0]:.2f}"
+			self.link_to_label_pitch.text = f"pitch: {head_pose[1]:.2f}"
+			self.link_to_label_row.text = f"row: {head_pose[2]:.2f}"
+
+			self.link_to_label_ear.text = f"ear: {ear:.4f}"
 			self.alarm_state = self.alarm_state or alarm_state
 
 			# refresh graph
