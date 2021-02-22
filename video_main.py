@@ -188,6 +188,12 @@ class VideoMain():
 		self.err_read_frame = False # error occured during frame reading
 		self.err_processing_frame = False# error occured during frame processing
 		self.ct = CentroidTracker()
+		self.attentive_dict = {
+			'yaw':[-50,50],
+			'pitch':[-50,50],
+			'row':[-50,50],
+		}
+		self.check_attention = False
 		
 
 	def start_stream(self):
@@ -308,15 +314,21 @@ class VideoMain():
 					
 					frame, head_pose = viz_pose(frame, param_lst, ver_lst, show_flag=False, return_pose=True)
 
+
+
+				# How to throw alert
 				if ear < self.ear_threashold:
 					self.drowsiness_counter += 1
 					if self.drowsiness_counter >= self.ear_consecutive_frames:
-						alarm_state = True
-						
+						alarm_state = True				
 				else:
 					self.drowsiness_counter = 0
 					alarm_state = False
-			
+
+				if self.check_attention:
+					print('check attention_dict')
+				else:
+					print('do not check attention_dict')
 			#
 			if len(self.ct.objects) == 0:
 				for i in range(0, len(inputCentroids)):
@@ -377,10 +389,10 @@ class VideoMain():
 							for col in unusedCols:
 								self.ct.register(inputCentroids[col])
 					# return the set of trackable objects
-					print(self.ct.objects)
+					# print(self.ct.objects)
 					
 				except Exception as e:
-					pass
+					print(e)
 
 
 
