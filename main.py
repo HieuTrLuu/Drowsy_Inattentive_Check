@@ -127,10 +127,16 @@ class Container(BoxLayout):
 			self.stream.show_video = False
 
 			self.link_to_image.texture = self.main_image_texture
+	
+
 
 	def on_spinner_clicked(self, value): 
 		print("Language selected is " + value) 
 		# self.stream.select_algo = value
+
+	def on_checkbox_click(self, value):
+		self.stream.overlay_bool = value
+		print(value)
 
 	def spinner_clicked(self, value): 
 		print("Language selected is " + value) 
