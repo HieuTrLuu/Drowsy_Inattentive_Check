@@ -322,7 +322,6 @@ class VideoMain():
 				for i in range(0, len(inputCentroids)):
 					self.ct.register(inputCentroids[i])
 			else:
-				# grab the set of object IDs and corresponding centroids
 				objectIDs = list(self.ct.objects.keys())
 				objectCentroids = list(self.ct.objects.values())
 				# compute the distance between each pair of object
@@ -330,17 +329,62 @@ class VideoMain():
 				# goal will be to match an input centroid to an existing
 				# object centroid
 				D = dist.cdist(np.array(objectCentroids), inputCentroids)
-				# in order to perform this matching we must (1) find the
-				# smallest value in each row and then (2) sort the row
-				# indexes based on their minimum values so that the row
-				# with the smallest value is at the *front* of the index
-				# list
+				
+				try:
 
-				# rows = D.min(axis=1).argsort()
-				# next, we perform a similar process on the columns by
-				# finding the smallest value in each column and then
-				# sorting using the previously computed row index list
-				# cols = D.argmin(axis=1)[rows]
+					rows = D.min(axis=1).argsort()
+					# next, we perform a similar process on the columns by
+					# finding the smallest value in each column and then
+					# sorting using the previously computed row index list
+					cols = D.argmin(axis=1)[rows]
+					usedRows = set()
+					usedCols = set()
+					# loop over the combination of the (row, column) index
+					# tuples
+					for (row, col) in zip(rows, cols):
+						# if we have already examined either the row or
+						# column value before, ignore it
+						# val
+						if row in usedRows or col in usedCols:
+							continue
+						# otherwise, grab the object ID for the current row,
+						# set its new centroid, and reset the disappeared
+						# counter
+						objectID = objectIDs[row]
+
+						self.ct.objects[objectID] = inputCentroids[col]
+						self.ct.disappeared[objectID] = 0
+
+						# indicate that we have examined each of the row and
+						# column indexes, respectively
+						usedRows.add(row)
+						usedCols.add(col)
+						unusedRows = set(range(0, D.shape[0])).difference(usedRows)
+						unusedCols = set(range(0, D.shape[1])).difference(usedCols)
+						if D.shape[0] >= D.shape[1]:
+							# loop over the unused row indexes
+							for row in unusedRows:
+								# grab the object ID for the corresponding row
+								# index and increment the disappeared counter
+								objectID = objectIDs[row]
+								self.ct.disappeared[objectID] += 1
+								# check to see if the number of consecutive
+								# frames the object has been marked "disappeared"
+								# for warrants deregistering the object
+								if self.ct.disappeared[objectID] > self.maxDisappeared:
+									self.ct.deregister(objectID)
+						else:
+							for col in unusedCols:
+								self.ct.register(inputCentroids[col])
+					# return the set of trackable objects
+					print(self.ct.objects)
+					
+				except Exception as e:
+					pass
+
+
+
+				
 
 			
 
