@@ -83,22 +83,22 @@ class Container(BoxLayout):
 		self.cameras = cameras
 
 	def play_sound(self, wav_file='alarm.wav'):
-		# if not self.sound_state:
-		# 	self.sound_state = True
-		# 	try:
-		# 		sound = SoundLoader.load('data/alarm.wav')
-		# 	except:
-		# 		logger.info('load reserve audio file')
-		# 		sound = SoundLoader.load('data/alarm_reserve.wav')
-		# 	sound.bind(on_stop=self.on_sound_stopped)
-		# 	sound.play()
-		pass
+		if not self.sound_state:
+			self.sound_state = True
+			try:
+				sound = SoundLoader.load('data/alarm.wav')
+			except:
+				logger.info('load reserve audio file')
+				sound = SoundLoader.load('data/alarm_reserve.wav')
+			sound.bind(on_stop=self.on_sound_stopped)
+			sound.play()
+		# pass
 
 	def on_sound_stopped(self, instance):
 		self.sound_state = False
 
 	def on_slider_ear(self, value):
-		self.stream.ear_threashold = float(str('{:.2f}').format(value))
+		self.stream.ear_threashold = float(value)
 
 	def on_slider_quality(self, value):
 		self.stream.reduce_image = value / 100
@@ -107,13 +107,14 @@ class Container(BoxLayout):
 		self.stream.seconds_to_detect_drowsiness = value
 
 	def on_input_attentiveness(self, value, angle, position):
-		print(f'value {value, angle, position}')
-		# print(f"{self.stream.attentive_dict}")
-		if position == 'bot':
-			self.stream.attentive_dict[angle][0]= value
-		elif position == 'top':
-			self.stream.attentive_dict[angle][1]= value
-
+		try:
+			value = float(value)
+			if position == 'bot':
+				self.stream.attentive_dict[angle][0]= float(value)
+			elif position == 'top':
+				self.stream.attentive_dict[angle][1]= float(value)
+		except:
+			print('incorrect type casting')
 
 	def on_show_video(self, value):
 		if value == 'Show video':
@@ -167,13 +168,30 @@ class Container(BoxLayout):
 		# refresh graph (bunch)
 		self.plot.points = self.points
 		# refrresh self.alarm_state (bunch)
-		if self.alarm_state:
-			# self.play_sound()
+
+		if self.alarm_state['drowsy']:
+			print('in drowsy loop')
+			self.play_sound()
+			self.link_to_alert_drowsy.canvas.children[0].rgb = [.7, 0, 0]
 			self.link_to_layout.canvas.children[0].rgb = [.7, 0, 0]
 		else:
+			self.link_to_alert_drowsy.canvas.children[0].rgb = [0, 0, 0]
 			self.link_to_layout.canvas.children[0].rgb = [0, 0, 0]
+
+
 		
+		if self.alarm_state['inattentive']:
+			print('in attentive loop')
+			self.play_sound()
+			self.link_to_alert_inattentive.canvas.children[0].rgb = [.7, 0, 0]
+			# self.link_to_alert_drowsy.canvas.children[0].rgb = [.7, 0, 0]
+		else:
+			self.link_to_alert_inattentive.canvas.children[0].rgb = [0, 0, 0]
+			# self.link_to_layout.canvas.children[0].rgb = [0, 0, 0]
+			# self.link_to_alert_drowsy.canvas.children[0].rgb = [0, 0, 0]
+
 		# show just last frame	
+
 		try:
 			if self.link_to_btn_show_video.text == 'Hide video':
 				# convert image to texture

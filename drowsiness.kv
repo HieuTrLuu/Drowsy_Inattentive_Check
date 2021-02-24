@@ -26,7 +26,6 @@
 	link_to_slider_delay: slider_delay
 	link_to_slider_quality: slider_quality
 	link_to_slider_eyes_tuner: slider_eyes_tuner
-	link_to_slider_angle_tuner: slider_angle_tuner
 
 	link_to_input_yaw: input_yaw
 	link_to_input_pitch: input_pitch
@@ -40,6 +39,8 @@
 	link_to_label_pitch: label_pitch
 	link_to_label_row: label_row
 
+	link_to_alert_drowsy: alert_drowsy
+	link_to_alert_inattentive: alert_inattentive
 
 	link_to_image: image
 	link_to_start_stop: start_stop
@@ -59,7 +60,7 @@
 		size: 500, 300
 		canvas:
 			Color:
-				rgb: 255, 255, 255
+				rgb: 0, 0, 0
 			Rectangle:
 				size: self.size
 
@@ -137,7 +138,7 @@
 
 			Label:
 				font_size: '15sp'
-				text: 'Time threshold for small EAR'
+				text: 'Time threshold for consecutive closed eyes'
 				text_size: self.size
 				halign: 'left'
 				valign: 'center'
@@ -203,34 +204,10 @@
 			
 
 			Label:
-	        	text: str(slider_eyes_tuner.value)
+				text: "{:.2f}".format(round(slider_eyes_tuner.value, 2))
+	        	#text: str(slider_eyes_tuner.value)
 	        BoxLayout:
 	        	padding: [10, 10, 10, 10]
-
-		BoxLayout:	# angle tunner
-			padding: 10
-			size_hint: 1, .2
-
-			Label:
-				font_size: '15sp'
-				text: 'Angle ratio'
-				text_size: self.size
-				halign: 'left'
-				valign: 'center'
-
-			Slider:
-				id: slider_angle_tuner
-				min: .1
-				max: .4
-				step: .01
-				value: .3
-				on_value: root.on_slider_ear(slider_angle_tuner.value)
-
-			Label:
-	        	text: str(slider_angle_tuner.value)
-	        BoxLayout:
-	        	padding: [10, 10, 10, 10]
-
 
 		BoxLayout:	# start/stop
 			padding: 5
@@ -362,29 +339,48 @@
 					Color:
 						rgb: 1,0,0
 				id: checkbox_attention
-				active: False
+				active: True
 				on_active: root.on_checkbox_attention_click(checkbox_attention.active)
 				pos_hint: {"x":0.6, "y":0.4}
 				size_hint: 0.05, 0.05
 
+
 		BoxLayout:	# Warning
 			padding: 10
-			size_hint: 1, .5
-
+			id: alert_drowsy
+			size_hint: 1, .35
+			canvas:
+				Color:
+					rgb: 0, 0, 0
+				Rectangle:
+					size: self.size
 			Label:
 				font_size: '15sp'
 				text: 'drowsiness warning'
 				text_size: self.size
 				halign: 'left'
 				valign: 'center'
-			
+
+		BoxLayout:	# Warning
+			padding: 10
+			id: alert_inattentive
+			size_hint: 1, .35
+			canvas:
+				Color:
+					rgb: 0, 0, 0
+				Rectangle:
+					size: self.size
 			Label:
 				font_size: '15sp'
-				text: 'attentiveness warning'
+				text: 'inattentive warning'
 				text_size: self.size
 				halign: 'left'
 				valign: 'center'
 
+
+		
+
+		
 	AnchorLayout:
 		Image:
 			id: image
