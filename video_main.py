@@ -193,7 +193,7 @@ class VideoMain():
 			'pitch':[-50,50],
 			'row':[-50,50],
 		}
-		self.check_attention = False
+		self.check_attention = True
 		
 
 	def start_stream(self):
@@ -236,7 +236,10 @@ class VideoMain():
 		self.looping = True
 		ear = 0.5
 		tic = perf_counter()
-		alarm_state = False
+		alarm_state = {
+			'drowsy': False, 
+			'inattentive': False, 
+			}
 		head_pose = [0,0,0]
 		while  self.looping:
 			# if this is a file video stream, then we need to check if
@@ -307,7 +310,8 @@ class VideoMain():
 						image_pints = get_6_main_keypoints(shape)
 						frame = get_head_pose(image_pints, frame)
 					except Exception as e:
-						print(e)
+						# print(e)
+						pass
 
 					cv2.drawContours(frame, [leftEyeHull], -1, (0, 255, 0), 1)
 					cv2.drawContours(frame, [rightEyeHull], -1, (0, 255, 0), 1)
@@ -320,16 +324,24 @@ class VideoMain():
 				if ear < self.ear_threashold:
 					self.drowsiness_counter += 1
 					if self.drowsiness_counter >= self.ear_consecutive_frames:
-						alarm_state = True				
+						alarm_state['drowsy'] = True				
 				else:
 					self.drowsiness_counter = 0
-					alarm_state = False
+					alarm_state['drowsy'] = False
 
 				if self.check_attention:
-					print('check attention_dict')
+					for (i,key) in enumerate(self.attentive_dict.keys()):
+						in_range = lambda input, bot, top: True if (top>=input >= bot) else False
+						angle = head_pose[i]
+						bot,top = self.attentive_dict[key]
+						if(not in_range(angle,bot,top)):
+							alarm_state['inattentive'] = True
+							break
+						else:
+							alarm_state['inattentive'] = False
 				else:
-					print('do not check attention_dict')
-			#
+					pass
+					
 			if len(self.ct.objects) == 0:
 				for i in range(0, len(inputCentroids)):
 					self.ct.register(inputCentroids[i])
@@ -343,7 +355,6 @@ class VideoMain():
 				D = dist.cdist(np.array(objectCentroids), inputCentroids)
 				
 				try:
-
 					rows = D.min(axis=1).argsort()
 					# next, we perform a similar process on the columns by
 					# finding the smallest value in each column and then
