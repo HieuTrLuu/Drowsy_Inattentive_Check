@@ -96,7 +96,28 @@
 
 			Label:
 				font_size: '15sp'
-				text: 'landmark detection algorithm'
+				text: 'Face detection algorithm'
+			# creating the spinner 
+			Spinner: 
+				# Assigning id  
+				id: spinner 
+				# Callback  
+				on_text: root.on_spinner_clicked(spinner.text) 
+				# initially text on spinner 
+				text: "BlazeFace"
+				# total values on spinner 
+				values: ["Dlib", "BlazeFace"] 
+				# declaring size of the spinner 
+				# and the position of it 
+				pos_hint:{'center_x':.5, 'top': 1} 
+
+		BoxLayout:	# Spinner of selected algorithm
+			padding: 10
+			size_hint: 1, 0.2
+
+			Label:
+				font_size: '15sp'
+				text: 'Facial landmark detection algorithm'
 			# creating the spinner 
 			Spinner: 
 				# Assigning id  
@@ -106,7 +127,7 @@
 				# initially text on spinner 
 				text: "3DFFA_V2"
 				# total values on spinner 
-				values: ["3DFFA_V2", "Dlib", "E2E video classification"] 
+				values: ["Dlib", "3DFFA_V2"] 
 				# declaring size of the spinner 
 				# and the position of it 
 				pos_hint:{'center_x':.5, 'top': 1} 
