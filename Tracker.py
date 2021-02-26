@@ -1,12 +1,11 @@
+# see more at: https://www.pyimagesearch.com/category/object-tracking/
 # import the necessary packages
 from scipy.spatial import distance as dist
 from collections import OrderedDict
 import numpy as np
 
-# where to declare this in the pipeline ?
-
 class CentroidTracker():
-	def __init__(self, maxDisappeared=50):
+	def __init__(self, maxDisappeared=1000):
 		# initialize the next unique object ID along with two ordered
 		# dictionaries used to keep track of mapping a given object
 		# ID to its centroid and number of consecutive frames it has
@@ -49,32 +48,35 @@ class CentroidTracker():
 			# to update
 			return self.objects
 
-
-# TODO: what pattern are we using here ?
-# 
-
-#Simple object tracking with OpenCV
-# update our centroid tracker using the computed set of bounding
-# box rectangles
-# objects = ct.update(rects)
-# # loop over the tracked objects
-# for (objectID, centroid) in objects.items():
-#     # draw both the ID of the object and the centroid of the
-#     # object on the output frame
-#     text = "ID {}".format(objectID)
-#     cv2.putText(frame, text, (centroid[0] - 10, centroid[1] - 10),
-#         cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-#     cv2.circle(frame, (centroid[0], centroid[1]), 4, (0, 255, 0), -1)
-# # show the output frame
-# cv2.imshow("Frame", frame)
-
-
-# ######
-
-# inputCentroids = np.zeros((len(rects), 2), dtype="int")
-# # loop over the bounding box rectangles
-# for (i, (startX, startY, endX, endY)) in enumerate(rects):
-#     # use the bounding box coordinates to derive the centroid
-#     cX = int((startX + endX) / 2.0)
-#     cY = int((startY + endY) / 2.0)
-#     inputCentroids[i] = (cX, cY)
+# correlation tracker
+# if conf > args["confidence"] and label == args["label"]:
+# 	# compute the (x, y)-coordinates of the bounding box
+# 	# for the object
+# 	box = detections[0, 0, i, 3:7] * np.array([w, h, w, h])
+# 	(startX, startY, endX, endY) = box.astype("int")
+# 	# construct a dlib rectangle object from the bounding
+# 	# box coordinates and then start the dlib correlation
+# 	# tracker
+# 	tracker = dlib.correlation_tracker()
+# 	rect = dlib.rectangle(startX, startY, endX, endY)
+# 	tracker.start_track(rgb, rect)
+# 	# draw the bounding box and text for the object
+# 	cv2.rectangle(frame, (startX, startY), (endX, endY),
+# 		(0, 255, 0), 2)
+# 	cv2.putText(frame, label, (startX, startY - 15),
+# 		cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 255, 0), 2)
+# else:
+# 	# update the tracker and grab the position of the tracked
+# 	# object
+# 	tracker.update(rgb)
+# 	pos = tracker.get_position()
+# 	# unpack the position object
+# 	startX = int(pos.left())
+# 	startY = int(pos.top())
+# 	endX = int(pos.right())
+# 	endY = int(pos.bottom())
+# 	# draw the bounding box from the correlation object tracker
+# 	cv2.rectangle(frame, (startX, startY), (endX, endY),
+# 		(0, 255, 0), 2)
+# 	cv2.putText(frame, label, (startX, startY - 15),
+# 		cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 255, 0), 2)		

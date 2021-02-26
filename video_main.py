@@ -1,5 +1,5 @@
 import sys
-sys.path.insert(0,'../DDFA_V2')
+sys.path.insert(0,'../TDDFA_V2')
 
 import yaml
 from FaceBoxes import FaceBoxes
@@ -399,15 +399,22 @@ class VideoMain():
 						else:
 							for col in unusedCols:
 								self.ct.register(inputCentroids[col])
-					# return the set of trackable objects
-					# print(self.ct.objects)
+					
+					for index in self.ct.objects:
+						centroid = self.ct.objects[index]
+						if(index==0):
+							text = "main user"
+						else:
+							text = "other user"
+						cv2.putText(frame, text, (centroid[0] - 10, centroid[1] - 10),cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
+						cv2.circle(frame, (centroid[0], centroid[1]), 4, (0, 255, 0), -1)	
 					
 				except Exception as e:
 					print(e)
 
 
-
-				
+		
+		
 
 			
 
