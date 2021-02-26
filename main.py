@@ -88,11 +88,9 @@ class Container(BoxLayout):
 			try:
 				sound = SoundLoader.load('data/alarm.wav')
 			except:
-				logger.info('load reserve audio file')
-				sound = SoundLoader.load('data/alarm_reserve.wav')
+				pass
 			sound.bind(on_stop=self.on_sound_stopped)
 			sound.play()
-		# pass
 
 	def on_sound_stopped(self, instance):
 		self.sound_state = False
